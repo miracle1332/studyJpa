@@ -27,6 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     @Override
     public void configure(WebSecurity web) throws Exception {
        web.ignoring()
+               .mvcMatchers("/node_modules/**")
                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
        //static한 리소스들은 시큐리티 필터를 적용하지 말라고 설정한것.static폴더 이미지 안보이는 이유
     }

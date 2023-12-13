@@ -57,7 +57,7 @@ public class AccountService {
 
     public void login(Account account) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                account.getNickname(),
+               new UserAccount(account), //이 객체가 principal객체가 된다. 만약 로그인을 하면 이게 로그인을 한 user객체로 간주가 됌.
                 account.getPassword(),
                 List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContextHolder.getContext().setAuthentication(token);
