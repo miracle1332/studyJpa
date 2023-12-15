@@ -22,6 +22,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
                 .mvcMatchers(HttpMethod.GET, "/profile/*").permitAll() //프로필 요청은 get만 허용
                 .anyRequest().authenticated();//나머지 요청은 로그인 해야만 쓸 수 있다
 
+       http.formLogin() //http.formLogin() 만 써도 시큐리티가 기본로그인페이지를 제공하는데.loginPage("/")를 쓰면 커스텀한 로그인페이지를 쓸 수 있따
+               .loginPage("/login").permitAll();
+
+       http.logout()
+               .logoutSuccessUrl("/"); //로그아웃 했을떄 어디로 갈지만 정함.
+
     }
 
     @Override

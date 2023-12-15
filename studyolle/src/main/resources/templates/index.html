@@ -4,6 +4,10 @@
 <head th:replace="fragments.html :: head"></head>
 <body class="bg-light">
 <div th:replace="fragments.html :: main-nav"></div>
+<div class="alert alert-warning" role="alert" th:if="${account != null && !account.emailVerified}">
+    <a href="#" th:href="@{/check-email}" class="alert-link">계정 인증 이메일을 확인</a>하세요.
+    <!--지금 경고메세지가 안뜨는 이유는 account가 null이니까 어카운트가 없어서 이 블럭을 보영줄 필요가 없는 것..!-->
+</div>
 <section class="jumbotron text-center">
     <div class="container">
         <h1>스터디올래</h1>
