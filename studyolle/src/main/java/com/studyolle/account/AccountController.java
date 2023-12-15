@@ -47,7 +47,7 @@ public class AccountController {
             return "account/sign-up"; //에러가 있으면 다시 폼을 보여줌
         }
 
-        Account account = accountService.processsNewAccount(signUpForm);//컨트롤러가 이 메소드들을 가질 필요없고 서비스가 가지고 있기 떄문에
+        Account account = accountService.processNewAccount(signUpForm);//컨트롤러가 이 메소드들을 가질 필요없고 서비스가 가지고 있기 떄문에
 //processNewAccount메소드로 두 뭉퉁이를 숨기도록함
         accountService.login(account);
         return "redirect:/"; //에러가 없으면 첫화면으로..
