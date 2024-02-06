@@ -2,8 +2,10 @@ package com.studyolle.settings;
 
 import com.studyolle.domain.Account;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class Profile { // 프로필로, 폼을 채울 객체
 
     private String bio;

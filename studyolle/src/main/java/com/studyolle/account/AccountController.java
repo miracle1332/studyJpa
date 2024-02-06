@@ -52,8 +52,8 @@ public class AccountController {
 
     @GetMapping("/check-email-token")
     public String checkEmailToken(String token, String email, Model model) {
-        //이메일에 해당하는 유저가 있는지 확인
-        Account account = accountRepository.findByEmail(email);
+        //이메일에 해당하는 유저가 있는지 확인 //리파지토리가 제공하는 모든 메소드는 트랜잭션 처리가 된다.
+        Account account = accountRepository.findByEmail(email); //리파지토리를 통해서 accountService.completeSignUp(account) 가기전에 영속성컨텍스트 만들어진 상태에서 트랜잭션통해서 데이터가져옴
         String view = "account/checked-email";
         if (account == null) { //이메일이 없을때
             model.addAttribute("error", "worng.email");
