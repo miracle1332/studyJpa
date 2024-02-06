@@ -21,12 +21,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional //트랜잭셔널 애노테이션을 붙여놔야 퍼시스트 상태가 유지됌
 public class AccountService implements UserDetailsService {
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional //트랜잭셔널 애노테이션을 붙여놔야 퍼시스트 상태가 유지됌
+
     public Account processNewAccount(SignUpForm signUpForm) {
         Account newAccount = saveNewAccount(signUpForm); //사인업폼 가지고 새 어카운트를 저장을 하고
         //저장이 된거고, 이제 이메일보내기
@@ -49,7 +50,7 @@ public class AccountService implements UserDetailsService {
         return newAccount;
     }
 
-    private void sendSignUpConfirmEmail(Account newAccount) {
+    void sendSignUpConfirmEmail(Account newAccount) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(newAccount.getEmail()); //이메일 받는사람
         mailMessage.setSubject("스터디올래, 회원가입 인증"); //메일 제목
@@ -68,6 +69,7 @@ public class AccountService implements UserDetailsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String emailOrNickname) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(emailOrNickname);
         if(account == null) {
@@ -79,5 +81,14 @@ public class AccountService implements UserDetailsService {
         }
         return new UserAccount(account); //프린시펄에 해당하는 객체를 넘기면 된다.
         //UserAccount에 스프링시큐리티가 제공한 유저를 확장한 유저어카운트이다.
+    }
+
+    public void completeSignUp(Account account) {
+        //위에 두if문 통과했으면 사실상 signup을 한것
+        account.completeSignUp();
+        // 기존 - 컨트롤러에 있던 코드
+        // account.setEmailVerified(true);
+        // account.setJoinedAt(LocalDateTime.now());
+        login(account);
     }
 }

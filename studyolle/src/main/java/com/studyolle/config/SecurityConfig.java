@@ -1,5 +1,7 @@
 package com.studyolle.config;
 
+import com.studyolle.account.AccountService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,11 +11,18 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+
+import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity //내가 직접 시큐리티 설정을 직접 하겠다는 뜻
+@RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter{
 
+    private final AccountService accountService;
+    private final DataSource dataSource; //jpa라 데이터소스가 자동으로 등록되있다. 가져다 쓰기만 하면 된다.
    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
@@ -26,8 +35,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
                .loginPage("/login").permitAll();
 
        http.logout()
-               .logoutSuccessUrl("/"); //로그아웃 했을떄 어디로 갈지만 정함.
+               .logoutSuccessUrl("/"); //로그아웃 했을떄 어디로 갈지만 정함.fdewsfghj
 
+       http.rememberMe()
+               .userDetailsService(accountService)
+               .tokenRepository(tokenRepository()); //username,토큰,시리즈 세가지정보를 조합해서 토큰정보를 db에 저장해야함.사용자쿠기와 리멤버미 쿠키비교해야함.
+
+    }
+
+    @Bean
+    public PersistentTokenRepository tokenRepository() {
+        JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
+        jdbcTokenRepository.setDataSource(dataSource);
+        return jdbcTokenRepository;
     }
 
     @Override

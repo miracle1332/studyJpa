@@ -8,10 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -67,15 +64,44 @@ public class AccountController {
             model.addAttribute("error", "worng.token"); //화면에서는 이유 상관없이 이메일이 정확하지 않다고만 보여줄것이다
             return view;
         }
-        //위에 두if문 통과했으면 사실상 signup을 한것
-        account.completeSignUp();
-        // 기존 - 컨트롤러에 있던 코드
-        // account.setEmailVerified(true);
-        // account.setJoinedAt(LocalDateTime.now());
-        accountService.login(account);
+        //트랙잭션 범위 안에서 일어난 변경사항을 관리한다 -> 데이터변경사항할일, 트랜잭션은 서비스에다 위임하는 것으로 함
+        accountService.completeSignUp(account);
+
         model.addAttribute("numberOfUser", accountRepository.count()); //jpa레파지토리에 기본으로 count()메소드 있음
         model.addAttribute("nickname", account.getNickname());
         return view;
     }
+
+    @GetMapping("/checked-email")
+    public String checkEmail(@CurrentAccount Account account, Model model) {
+        model.addAttribute("email", account.getEmail());
+        return "account/check-email";
+    }
+
+
+
+    @GetMapping("resend-confirm-email")
+    public String resendConfirmEmail(@CurrentAccount Account account, Model model) {
+        if(!account.canSendConfirmEmail()) {
+            model.addAttribute("error","인증 이ㅣ메일은 한시간에 한번만 전송 가능합니다.");
+            model.addAttribute("email",account.getEmail());
+            return "account/check-email";
+        }
+
+        accountService.sendSignUpConfirmEmail(account);
+        return "redirect:/";
+    }
+
+    @GetMapping("/profile/{nickname}")
+    public String viewProfile(@PathVariable String nickname, Model model, @CurrentAccount Account account) {
+        Account byNickName = accountRepository.findByNickname(nickname);
+        if(nickname == null) {
+            throw new IllegalArgumentException(nickname + "에 해당하는 사용자가 없습니다.");
+        }
+        model.addAttribute(byNickName);
+        model.addAttribute("isOwner",byNickName.equals(account));
+        return "account/profile";
+    }
+
 
 }
