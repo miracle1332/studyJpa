@@ -98,5 +98,8 @@ public class AccountService implements UserDetailsService {
         account.setOccupation(profile.getOccupation());
         account.setLocation(profile.getLocation());
         account.setBio(profile.getBio());
+        accountRepository.save(account);
+        //save구현체 안에서 아이디 값이 있는지 없는지 보고 아이디값이 있으면 merge시킴
+        //==기존데이터에 업데이트시키는것.
     }
 }

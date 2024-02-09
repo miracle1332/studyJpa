@@ -10,6 +10,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 @Controller
@@ -31,7 +32,8 @@ public class SettingsController {
     }
 
     @PostMapping("/settings/profile")
-    public String updateProfile(@CurrentAccount Account account, @Valid @ModelAttribute Profile profile, Errors errors, Model model) {
+    public String updateProfile(@CurrentAccount Account account, @Valid @ModelAttribute Profile profile, Errors errors,
+                                Model model, RedirectAttributes attributes) {
         //위의 Account정보는 persist상태의 정보가 아닌 세션에 넣어놓은 authentication안에 들어있는 principal 객체의 정보이다
         //errors는 바인딩 에러를 받아주는 모델에트리뷰트로 받는객체의 오른쪽에 두어야함 , @ModelAttribute는 생략가능
         if (errors.hasErrors()) { //폼에 채웟던 정보뿐만 아니라 에러에 대한 정보도 모델에 자동으로 들어간다.
@@ -39,6 +41,7 @@ public class SettingsController {
             return SETTINGS_PROFILE_VIEW_NAME;
         }
         accountService.updateProfile(account, profile); //account를 profile로 변경해달라
+        attributes.addFlashAttribute("message","프로필을 수정했습니다..");
         return "redirect:"  + SETTINGS_PROFILE_URL;//변경하고 난뒤 get post redirect패턴 - 사용자가 화면을 새로고침해도 폼 서브밋이 다시 일어나지 않도록!
     }
 }
