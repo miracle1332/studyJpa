@@ -15,10 +15,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.validation.Valid;
 @Controller
 @RequiredArgsConstructor
-public class SettingsController {
+public class SettingsController { //현재 사용자에 대한 정보를 넣어주고 수정하는 기능 컨트롤러
 
-    private static final String SETTINGS_PROFILE_VIEW_NAME = "settings/profile";
-    private static final String SETTINGS_PROFILE_URL = "/settings/profile";
+   static final String SETTINGS_PROFILE_VIEW_NAME = "settings/profile";
+   static final String SETTINGS_PROFILE_URL = "/settings/profile";
 
     private final AccountService accountService; //데이터변경사항은 트랜잭션내에서 처리하고 서비스쪽에 위임했음.
 
@@ -31,7 +31,7 @@ public class SettingsController {
         return SETTINGS_PROFILE_VIEW_NAME; //사실 이코드는 줄일 수 있음 뷰네임 트랜슬레이터가 알아서 추측함.
     }
 
-    @PostMapping("/settings/profile")
+    @PostMapping(SETTINGS_PROFILE_URL)
     public String updateProfile(@CurrentAccount Account account, @Valid @ModelAttribute Profile profile, Errors errors,
                                 Model model, RedirectAttributes attributes) {
         //위의 Account정보는 persist상태의 정보가 아닌 세션에 넣어놓은 authentication안에 들어있는 principal 객체의 정보이다
