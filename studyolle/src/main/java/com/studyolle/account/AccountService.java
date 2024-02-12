@@ -1,6 +1,7 @@
 package com.studyolle.account;
 
 import com.studyolle.domain.Account;
+import com.studyolle.settings.PasswordForm;
 import com.studyolle.settings.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
@@ -98,8 +99,15 @@ public class AccountService implements UserDetailsService {
         account.setOccupation(profile.getOccupation());
         account.setLocation(profile.getLocation());
         account.setBio(profile.getBio());
+        account.setProfileImage(profile.getProfileImage());
         accountRepository.save(account);
         //save구현체 안에서 아이디 값이 있는지 없는지 보고 아이디값이 있으면 merge시킴
         //==기존데이터에 업데이트시키는것.
+    }
+
+    public void updatePassword(Account account, String newPassword) {
+        //account.setPassword(newPassword); //->이렇게하면 평문 저장
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account); //셋팅컨트롤러에서 account가 detached객체이므로 명시적으로 머지해주어야함.
     }
 }
