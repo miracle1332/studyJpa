@@ -37,7 +37,7 @@ class SettingsControllerTest {
         accountRepository.deleteAll();
     }
 
-    @WithAccount("hyerin")
+    @WithAccount("hyerin") //요청url자체가 인증된 사용자만 접근할 수 있는 요청이라 이게 없으면 동작하지않음
     @DisplayName("프로필 수정하기 - 입력값 정상")
     @Test
     void updateProfile() throws Exception {
