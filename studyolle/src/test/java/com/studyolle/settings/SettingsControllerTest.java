@@ -26,10 +26,8 @@ class SettingsControllerTest {
 
     @Autowired MockMvc mockMvc;
     @Autowired AccountRepository accountRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
-    ObjectMapper objectMapper;
+    @Autowired PasswordEncoder passwordEncoder;
+    @Autowired ObjectMapper objectMapper;
 
 
     @AfterEach
@@ -70,5 +68,39 @@ class SettingsControllerTest {
         Account hyerin = accountRepository.findByNickname("hyerin");
         assertNull(bio, hyerin.getBio());
     }
+
+    @WithAccount("hyerin")
+    @DisplayName("패스워드 수정 - 입력값 정상")
+    @Test
+    void updaptePassword_success() throws Exception {
+        mockMvc.perform(post(SettingsController.SETTINGS_PASSWORD_URL)
+                .param("newPassword","12345678")
+                .param("newPasswordConfirm","12345678")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(SettingsController.SETTINGS_PASSWORD_URL))
+                .andExpect(flash().attributeExists("message"));
+
+        Account hyerin = accountRepository.findByNickname("hyerin");
+        assertTrue(passwordEncoder.matches("12345678", hyerin.getPassword()));
+    }
+    @WithAccount("hyerin")
+    @DisplayName("패스워드 수정 - 입력값 에러 - 패스워드 불일치")
+    @Test
+    void updaptePassword_fail() throws Exception {
+        mockMvc.perform(post(SettingsController.SETTINGS_PASSWORD_URL)
+                        .param("newPassword","12345678")
+                        .param("newPasswordConfirm","11111111")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name(SettingsController.SETTINGS_PASSWORD_VIEW_NAME))
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeExists("passwordForm"))
+                .andExpect(model().attributeExists("account"));
+
+        Account hyerin = accountRepository.findByNickname("hyerin");
+        assertTrue(passwordEncoder.matches("12345678", hyerin.getPassword()));
+    }
+
 
 }
