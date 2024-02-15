@@ -1,6 +1,7 @@
-package com.studyolle.settings;
+package com.studyolle.settings.validator;
 
 
+import com.studyolle.settings.form.PasswordForm;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 //Bean으로 등록하지 않음. 왜냐면 이 패스워드 벨리데이터는 다른 빈을 사용할 게 없으므로 이건 그냥 new생성하면 됌.
