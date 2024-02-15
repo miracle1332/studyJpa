@@ -4,6 +4,8 @@ import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentAccount;
 import com.studyolle.domain.Account;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -25,7 +27,11 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
     static final String SETTINGS_PASSWORD_VIEW_NAME = "settings/password";
     static final String SETTINGS_PASSWORD_URL = "/settings/password";
 
+    static final String SETTINGS_NOTIFICATIONS_VIEW_NAME = "settings/notifications";
+    static final String SETTINGS_NOTIFICATIONS_URL = "/settings/notifications";
+
     private final AccountService accountService; //데이터변경사항은 트랜잭션내에서 처리하고 서비스쪽에 위임했음.
+    private final ModelMapper modelMapper;
     @InitBinder("passwordForm")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(new PasswordFormValidator());
@@ -37,7 +43,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
     public String updateProfileForm(@CurrentAccount Account account, Model model) {
         //뷰를 보여줄때 사용할 모델객체들이 필요하니까 모델 정보를
         model.addAttribute(account); //모델에 어카운트 정보를 넣어줌
-        model.addAttribute(new Profile(account));
+        model.addAttribute(modelMapper.map(account, Profile.class));
         return SETTINGS_PROFILE_VIEW_NAME; //사실 이코드는 줄일 수 있음 뷰네임 트랜슬레이터가 알아서 추측함.
     }
 
@@ -71,5 +77,26 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
         accountService.updatePassword(account, passwordForm.getNewPassword());
         attributes.addFlashAttribute("message","패스워드를 변경했습니당");
         return "redirect:" + SETTINGS_PASSWORD_URL;
+    }
+
+    //알림설정 - 테스트코드 작성안함 - 난 해보기
+    @GetMapping(SETTINGS_NOTIFICATIONS_URL)
+    public String updateNotificationsForm(@CurrentAccount Account account, Model model){
+        model.addAttribute(account);
+        model.addAttribute(modelMapper.map(account, Notifications.class));
+        return SETTINGS_NOTIFICATIONS_VIEW_NAME;
+    }
+
+    @PostMapping(SETTINGS_NOTIFICATIONS_URL)
+    public String updateNotifications(@CurrentAccount Account account, @Valid @ModelAttribute Notifications notifications, Errors errors,
+                                      Model model, RedirectAttributes attributes) {
+        if(errors.hasErrors()) {
+            model.addAttribute(account);
+            return SETTINGS_NOTIFICATIONS_VIEW_NAME;
+        }
+        accountService.updateNotifications(account, notifications);
+        attributes.addFlashAttribute("message","알림설정을 변경했습니다~");
+        return "redirect:" + SETTINGS_NOTIFICATIONS_URL;
+
     }
 }

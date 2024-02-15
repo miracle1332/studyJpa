@@ -1,9 +1,12 @@
 package com.studyolle.account;
 
 import com.studyolle.domain.Account;
+import com.studyolle.settings.Notifications;
 import com.studyolle.settings.PasswordForm;
 import com.studyolle.settings.Profile;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.NameTokenizers;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +31,7 @@ public class AccountService implements UserDetailsService {
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
 
 
     public Account processNewAccount(SignUpForm signUpForm) {
@@ -95,19 +99,36 @@ public class AccountService implements UserDetailsService {
     }
 
     public void updateProfile(Account account, Profile profile) {
-        account.setUrl(profile.getUrl()); //여기서 업데이트 정보를 변경하다.
+        modelMapper.map(profile, account);//프로필에 있는 데이터를 어카운트에세팅
+        accountRepository.save(account);
+        /*account.setUrl(profile.getUrl()); //여기서 업데이트 정보를 변경하다.
         account.setOccupation(profile.getOccupation());
         account.setLocation(profile.getLocation());
         account.setBio(profile.getBio());
         account.setProfileImage(profile.getProfileImage());
         accountRepository.save(account);
         //save구현체 안에서 아이디 값이 있는지 없는지 보고 아이디값이 있으면 merge시킴
-        //==기존데이터에 업데이트시키는것.
+        //==기존데이터에 업데이트시키는것.*/
     }
 
     public void updatePassword(Account account, String newPassword) {
         //account.setPassword(newPassword); //->이렇게하면 평문 저장
         account.setPassword(passwordEncoder.encode(newPassword));
         accountRepository.save(account); //셋팅컨트롤러에서 account가 detached객체이므로 명시적으로 머지해주어야함.
+    }
+
+    public void updateNotifications(Account account, Notifications notifications) {
+       /* account.setStudyCreatedByEmail(notifications.isStudyCreatedByEmail());
+        account.setStudyCreatedByWeb(notifications.isStudyCreatedByWeb());
+        account.setStudyUpdateByWeb(notifications.isStudyUpdatedByWeb());
+        account.setStudyUpdateByEmail(notifications.isStudyUpdatedByEmail());
+        account.setStudyEnrollmentResultByWeb(notifications.isStudyEnrollmentResultByWeb());
+        account.setStudyEnrollmentResultByEmail(notifications.isStudyEnrollmentResultByEmail());*/
+        modelMapper.getConfiguration()
+                 .setDestinationNameTokenizer(NameTokenizers.UNDERSCORE)
+                .setSourceNameTokenizer(NameTokenizers.UNDERSCORE); //언더스코어가 아닌 이상 전부 하나의 프로퍼티로 간주.
+        //노티피케이션의 변수가 길어서 매핑이 잘 안되는 경우가 발생했음.
+        accountRepository.save(account);
+
     }
 }

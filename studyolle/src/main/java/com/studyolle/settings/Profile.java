@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 @Data
-@NoArgsConstructor
+//@NoArgsConstructor
 public class Profile {
 
     private String profileImage; // 프로필로, 폼을 채울 객체
@@ -23,11 +23,4 @@ public class Profile {
     @Length(max = 50)
     private  String location;
 
-    //폼을 채울때 어카운트 정보를 이용해서 채워야하기에
-    public Profile(Account account) {
-        this.bio = account.getBio();
-        this.occupation = account.getOccupation();
-        this.location = account.getLocation();
-        this.profileImage = account.getProfileImage();
-    }
 }

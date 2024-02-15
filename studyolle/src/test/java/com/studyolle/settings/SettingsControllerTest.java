@@ -84,6 +84,7 @@ class SettingsControllerTest {
         Account hyerin = accountRepository.findByNickname("hyerin");
         assertTrue(passwordEncoder.matches("12345678", hyerin.getPassword()));
     }
+    //컨틀롤러부터 하나의 기능단위로 보고 테스트코드 작성하는 스타일임 그래서 얽혀있는 서비스, 리파지토리 다 같이 테스트.
     @WithAccount("hyerin")
     @DisplayName("패스워드 수정 - 입력값 에러 - 패스워드 불일치")
     @Test
