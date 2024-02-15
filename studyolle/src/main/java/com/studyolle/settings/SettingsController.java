@@ -3,6 +3,7 @@ package com.studyolle.settings;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentAccount;
 import com.studyolle.domain.Account;
+import com.studyolle.settings.form.NicknameForm;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.PasswordForm;
 import com.studyolle.settings.form.Profile;
@@ -32,6 +33,8 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
 
     static final String SETTINGS_NOTIFICATIONS_VIEW_NAME = "settings/notifications";
     static final String SETTINGS_NOTIFICATIONS_URL = "/settings/notifications";
+    static final String SETTINGS_ACCOUNT_URL = "settings/account";
+    static final String SETTINGS_ACCOUNT_VIEW_NAME = "/settings/account";
 
     private final AccountService accountService; //데이터변경사항은 트랜잭션내에서 처리하고 서비스쪽에 위임했음.
     private final ModelMapper modelMapper;
@@ -102,4 +105,27 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
         return "redirect:" + SETTINGS_NOTIFICATIONS_URL;
 
     }
+
+    //닉네임 변경
+    @GetMapping(SETTINGS_ACCOUNT_URL)
+    public String updateAccountForm(@CurrentAccount Account account, Model model) {
+        model.addAttribute(account);
+        model.addAttribute(modelMapper.map(account, NicknameForm.class));
+        return SETTINGS_ACCOUNT_VIEW_NAME;
+    }
+
+    @PostMapping(SETTINGS_ACCOUNT_URL)
+    public String updateAccount(@CurrentAccount Account account, @Valid @ModelAttribute NicknameForm nicknameForm, Errors errors,
+                                 Model model, RedirectAttributes attributes) {
+        if(errors.hasErrors()) {
+            model.addAttribute(account);
+            return SETTINGS_ACCOUNT_VIEW_NAME;
+        }
+        accountService.updateNickname(account, nicknameForm.getNickname());
+        attributes.addFlashAttribute("message","닉네임을 변경했습니다.");
+        return "redirect:" + SETTINGS_ACCOUNT_URL;
+    }
+
+
 }
+
