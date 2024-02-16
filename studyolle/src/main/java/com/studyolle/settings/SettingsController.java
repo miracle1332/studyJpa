@@ -35,6 +35,8 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
     static final String SETTINGS_NOTIFICATIONS_URL = "/settings/notifications";
     static final String SETTINGS_ACCOUNT_URL = "settings/account";
     static final String SETTINGS_ACCOUNT_VIEW_NAME = "/settings/account";
+    static final String SETTINGS_TAGS_URL = "settings/tags";
+    static final String SETTINGS_TAGS_VIEW_NAME = "/settings/tags";
 
     private final AccountService accountService; //데이터변경사항은 트랜잭션내에서 처리하고 서비스쪽에 위임했음.
     private final ModelMapper modelMapper;
@@ -104,6 +106,12 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
         attributes.addFlashAttribute("message","알림설정을 변경했습니다~");
         return "redirect:" + SETTINGS_NOTIFICATIONS_URL;
 
+    }
+
+    @GetMapping(SETTINGS_TAGS_URL)
+    public String updateTags(@CurrentAccount Account account, Model model) {
+        model.addAttribute(account);
+        return SETTINGS_TAGS_VIEW_NAME;
     }
 
     //닉네임 변경

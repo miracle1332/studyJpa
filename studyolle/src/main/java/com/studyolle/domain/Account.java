@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -11,9 +12,10 @@ import java.util.UUID;
 @Builder @AllArgsConstructor @NoArgsConstructor
 public class Account {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue //엔티티
     private Long id;
 
+    ///value - 밸류는 라이프사이클이 엔티티에 종속되어 있다. 독자적인 라이프사이클이 없다.
     @Column(unique = true) //유일키
     private String email;
 
@@ -43,15 +45,18 @@ public class Account {
 
     private boolean studyCreatedByEmail; //스터디 오픈소식을 이메일로 받을것인가
 
-    private boolean studyCreatedByWeb; //웹으로 받을 것인가
+    private boolean studyCreatedByWeb = true; //웹으로 받을 것인가
 
     private boolean studyEnrollmentResultByEmail; //스터디 가입신청 결과를 이메일로 받을것인가
 
-    private boolean studyEnrollmentResultByWeb; //웹으로 받을것인가
+    private boolean studyEnrollmentResultByWeb = true; //웹으로 받을것인가
 
     private boolean studyUpdateByEmail; //스터디 갱신 정보
 
-    private boolean studyUpdateByWeb;
+    private boolean studyUpdateByWeb = true;
+
+    @ManyToMany
+    private Set<Tag> tags;
 
     public void generateEmailCheckToken()
     {
