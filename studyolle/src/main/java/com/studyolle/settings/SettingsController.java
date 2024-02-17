@@ -3,34 +3,33 @@ package com.studyolle.settings;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentAccount;
 import com.studyolle.domain.Account;
-import com.studyolle.settings.form.NicknameForm;
-import com.studyolle.settings.form.Notifications;
-import com.studyolle.settings.form.PasswordForm;
-import com.studyolle.settings.form.Profile;
+import com.studyolle.domain.Tag;
+import com.studyolle.settings.form.*;
 import com.studyolle.settings.validator.PasswordFormValidator;
+import com.studyolle.tag.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Controller
 @RequiredArgsConstructor
 public class SettingsController { //현재 사용자에 대한 정보를 넣어주고 수정하는 기능 컨트롤러
-
 
     static final String SETTINGS_PROFILE_VIEW_NAME = "settings/profile";
     static final String SETTINGS_PROFILE_URL = "/settings/profile";
     static final String SETTINGS_PASSWORD_VIEW_NAME = "settings/password";
     static final String SETTINGS_PASSWORD_URL = "/settings/password";
-
     static final String SETTINGS_NOTIFICATIONS_VIEW_NAME = "settings/notifications";
     static final String SETTINGS_NOTIFICATIONS_URL = "/settings/notifications";
     static final String SETTINGS_ACCOUNT_URL = "settings/account";
@@ -38,6 +37,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
     static final String SETTINGS_TAGS_URL = "settings/tags";
     static final String SETTINGS_TAGS_VIEW_NAME = "/settings/tags";
 
+    private final TagRepository tagRepository;
     private final AccountService accountService; //데이터변경사항은 트랜잭션내에서 처리하고 서비스쪽에 위임했음.
     private final ModelMapper modelMapper;
     @InitBinder("passwordForm")
@@ -111,7 +111,39 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
     @GetMapping(SETTINGS_TAGS_URL)
     public String updateTags(@CurrentAccount Account account, Model model) {
         model.addAttribute(account);
+        Set<Tag> tags = accountService.getTags(account);
+        model.addAttribute("tags",tags.stream().map(Tag::getTitle).collect(Collectors.toList())); //tags엔티티자체를 보내준는게 아니라 tags의 title만 가져와서 콜렉트로 수집해서 리스트로 만들어 보내줌!
+        //즉, 태그목록을 뷰에 전달함.
         return SETTINGS_TAGS_VIEW_NAME;
+    }
+
+    @PostMapping(SETTINGS_TAGS_URL + "/add") //ajax요청
+    @ResponseBody
+    public ResponseEntity addTag(@CurrentAccount Account account, @RequestBody TagForm tagForm) {
+        String title = tagForm.getTagTitle();
+       //옵셔널 쓰는 경우 - 값없으면
+        // Tag tag = tagRepository.findByTitle(title).orElseGet(() -> tagRepository.save(Tag.builder().title(tagForm.getTagTitle()).build()));
+
+        //옵셔널 안쓰는 경우
+        Tag tag = tagRepository.findByTitle(title);
+        if(tag == null) {
+            tag = tagRepository.save(Tag.builder().title(tagForm.getTagTitle()).build()); //기존 관심주제가 없으면 새로 저장
+        }
+        accountService.addTag(account, tag);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(SETTINGS_TAGS_URL + "/remove") //ajax요청
+    @ResponseBody
+    public ResponseEntity removeTag(@CurrentAccount Account account, @RequestBody TagForm tagForm) {
+        String title = tagForm.getTagTitle();
+        Tag tag = tagRepository.findByTitle(title);
+        if(tag == null) {
+            //기존 관심주제 없으면 badrequest로 응답
+            return ResponseEntity.badRequest().build();
+        }
+        accountService.removeTag(account, tag); //정상적인 경우 태그 삭제
+        return ResponseEntity.ok().build();
     }
 
     //닉네임 변경

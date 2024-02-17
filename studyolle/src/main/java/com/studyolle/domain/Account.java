@@ -56,7 +56,7 @@ public class Account {
     private boolean studyUpdateByWeb = true;
 
     @ManyToMany
-    private Set<Tag> tags;
+    private Set<Tag> tags; //set, list차이
 
     public void generateEmailCheckToken()
     {
@@ -76,4 +76,5 @@ public class Account {
     public boolean canSendConfirmEmail() {
         return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
     }
+
 }
