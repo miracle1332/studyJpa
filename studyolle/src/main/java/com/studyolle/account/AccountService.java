@@ -39,13 +39,16 @@ public class AccountService implements UserDetailsService {
     public Account processNewAccount(SignUpForm signUpForm) {
         Account newAccount = saveNewAccount(signUpForm); //사인업폼 가지고 새 어카운트를 저장을 하고
         //저장이 된거고, 이제 이메일보내기
-        newAccount.generateEmailCheckToken(); //토큰생성
         sendSignUpConfirmEmail(newAccount); //확인이메일을 보냈구나.
         return newAccount;
     }
 
     private Account saveNewAccount(@Valid SignUpForm signUpForm) {
-        //실제로 어카운트 객체으로 만들어서 검증해보아야함
+        signUpForm.setPassword(passwordEncoder.encode(signUpForm.getPassword()));
+        Account account = modelMapper.map(signUpForm, Account.class); // 생성자로 만들어서 study~->true세팅이 적용됌.
+        account.generateEmailCheckToken(); //토큰생성
+
+      /*  //실제로 어카운트 객체으로 만들어서 검증해보아야함
         Account account = Account.builder()
                 .email(signUpForm.getEmail())
                 .nickname(signUpForm.getNickname())
@@ -53,7 +56,7 @@ public class AccountService implements UserDetailsService {
                 .studyUpdateByWeb(true) //스터디 알림은 웹 관련만 켜두기로 - 나머지들은 기본값 false이다.
                 .studyCreatedByWeb(true)
                 .studyEnrollmentResultByWeb(true)
-                .build();
+                .build();*/
         Account newAccount =  accountRepository.save(account); //어카운트 레파지토리로 저장을 한다.
         return newAccount;
     }

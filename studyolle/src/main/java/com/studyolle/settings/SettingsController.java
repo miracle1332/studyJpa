@@ -1,5 +1,7 @@
 package com.studyolle.settings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentAccount;
 import com.studyolle.domain.Account;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,6 +43,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
     private final TagRepository tagRepository;
     private final AccountService accountService; //데이터변경사항은 트랜잭션내에서 처리하고 서비스쪽에 위임했음.
     private final ModelMapper modelMapper;
+    private final ObjectMapper objectMapper;
     @InitBinder("passwordForm")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(new PasswordFormValidator());
@@ -109,11 +113,17 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
     }
 
     @GetMapping(SETTINGS_TAGS_URL)
-    public String updateTags(@CurrentAccount Account account, Model model) {
+    public String updateTags(@CurrentAccount Account account, Model model) throws JsonProcessingException {
         model.addAttribute(account);
+
         Set<Tag> tags = accountService.getTags(account);
         model.addAttribute("tags",tags.stream().map(Tag::getTitle).collect(Collectors.toList())); //tags엔티티자체를 보내준는게 아니라 tags의 title만 가져와서 콜렉트로 수집해서 리스트로 만들어 보내줌!
         //즉, 태그목록을 뷰에 전달함.
+
+        //컨트롤러에서 뷰를 보여줄때 태그목록을 whiteList로 보여주어야함.
+        List<String> allTags = tagRepository.findAll().stream().map(Tag::getTitle).collect(Collectors.toList());
+        //자바객체의 list타입--> json문자열 변환하기 --> objectMapper사용 //이미 빈으로 등록되어있음.
+        model.addAttribute("whiteList",objectMapper.writeValueAsString(allTags));
         return SETTINGS_TAGS_VIEW_NAME;
     }
 

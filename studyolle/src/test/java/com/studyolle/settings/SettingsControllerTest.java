@@ -5,18 +5,23 @@ import com.studyolle.WithAccount;
 import com.studyolle.account.AccountRepository;
 import com.studyolle.account.AccountService;
 import com.studyolle.domain.Account;
+import com.studyolle.domain.Tag;
+import com.studyolle.settings.form.TagForm;
+import com.studyolle.tag.TagRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -27,7 +32,9 @@ class SettingsControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired AccountRepository accountRepository;
     @Autowired PasswordEncoder passwordEncoder;
-    @Autowired ObjectMapper objectMapper;
+    @Autowired ObjectMapper objectMapper; //이미 빈으로 등록되어있음.
+    @Autowired TagRepository tagRepository;
+    @Autowired AccountService accountService;
 
 
     @AfterEach
@@ -88,7 +95,7 @@ class SettingsControllerTest {
     @WithAccount("hyerin")
     @DisplayName("패스워드 수정 - 입력값 에러 - 패스워드 불일치")
     @Test
-    void updaptePassword_fail() throws Exception {
+    void updatePassword_fail() throws Exception {
         mockMvc.perform(post(SettingsController.SETTINGS_PASSWORD_URL)
                         .param("newPassword","12345678")
                         .param("newPasswordConfirm","11111111")
@@ -103,5 +110,50 @@ class SettingsControllerTest {
         assertTrue(passwordEncoder.matches("12345678", hyerin.getPassword()));
     }
 
+    @WithAccount("hyerin")
+    @DisplayName("계정의 태그 수정 폼")
+    @Test
+    void updateTagsForm() throws Exception {
+        mockMvc.perform(get(SettingsController.SETTINGS_TAGS_URL))
+                .andExpect(view().name(SettingsController.SETTINGS_TAGS_VIEW_NAME))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("whitelist"))
+                .andExpect(model().attributeExists("tags"));
+    }
 
+    @WithAccount("hyerin")
+    @DisplayName("계정에 태그 추가")
+    @Test
+    void addTag() throws Exception {
+        TagForm tagForm = new TagForm();
+        tagForm.setTagTitle("newTagTitle");
+
+        mockMvc.perform(post(SettingsController.SETTINGS_TAGS_URL + "/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(tagForm))
+                .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @WithAccount("hyerin")
+    @DisplayName("계정에 태그 삭제")
+    @Test
+    void removeTag() throws Exception {
+        Account hyerin = accountRepository.findByNickname("hyerin");
+        Tag newTag = tagRepository.save(Tag.builder().title("newTag").build());
+        accountService.addTag(hyerin, newTag);
+
+        assertTrue(hyerin.getTags().contains(newTag));
+
+        TagForm tagForm = new TagForm();
+        tagForm.setTagTitle("newTag");
+
+        mockMvc.perform(post(SettingsController.SETTINGS_TAGS_URL + "/remove")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tagForm))
+                        .with(csrf()))
+                .andExpect(status().isOk());
+
+        assertFalse(hyerin.getTags().contains(newTag));
+    }
 }
