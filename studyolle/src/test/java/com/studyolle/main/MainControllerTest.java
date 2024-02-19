@@ -33,8 +33,8 @@ class MainControllerTest {
     @BeforeEach
     void beforeEach() {
         SignUpForm signUpForm = new SignUpForm();
-        signUpForm.setNickname("hyerin");
-        signUpForm.setEmail("hyerin@email.com");
+        signUpForm.setNickname("");
+        signUpForm.setEmail("@email.com");
         signUpForm.setPassword("12345678");
         accountService.processNewAccount(signUpForm);
 
@@ -48,12 +48,12 @@ class MainControllerTest {
     void login_with_email() throws Exception{
 
         mockMvc.perform(post("/login")//포스트로 로그인이라는 곳으로 요청을 보내면-스프링시큐리티가 처리
-                        .param("username","hyerin@email.com")
+                        .param("username","@email.com")
                         .param("password","12345678")
                         .with(csrf()))  //csrf토큰이 폼을 전달할때 같이 전송될 수 있도록
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"))
-                .andExpect(authenticated().withUsername("hyerin"));
+                .andExpect(authenticated().withUsername(""));
         //UserAccount클래스에서 super()에 account.getNicknabe() -유저네임 부분을 닉네임으로 리턴했기 때문에 혜린으로 로그인잉 된 것처럼 될것임.
     }
     @DisplayName("닉네임으로 로그인 성공")
@@ -61,12 +61,12 @@ class MainControllerTest {
     void login_with_nickname() throws Exception{
 
         mockMvc.perform(post("/login")//포스트로 로그인이라는 곳으로 요청을 보내면-스프링시큐리티가 처리
-                        .param("username","hyerin")
+                        .param("username","")
                         .param("password","12345678")
                         .with(csrf()))  //csrf토큰이 폼을 전달할때 같이 전송될 수 있도록
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"))
-                .andExpect(authenticated().withUsername("hyerin"));
+                .andExpect(authenticated().withUsername(""));
         //UserAccount클래스에서 super()에 account.getNicknabe() -유저네임 부분을 닉네임으로 리턴했기 때문에 혜린으로 로그인잉 된 것처럼 될것임.
     }
 

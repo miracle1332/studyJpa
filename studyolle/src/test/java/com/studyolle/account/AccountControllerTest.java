@@ -84,7 +84,7 @@ class AccountControllerTest {
     @Test
     void signUpSubmit_with_wrong_input() throws Exception{
         mockMvc.perform(post("/sign-up")
-                        .param("nickname", "hyerin")
+                        .param("nickname", "")
                         .param("email","emailafds")
                         .param("password","1234")
                         .with(csrf()))
@@ -97,13 +97,13 @@ class AccountControllerTest {
     @Test
     void signUpSubmit_with_correct_input() throws Exception {
         mockMvc.perform(post("/sign-up")
-                        .param("nickname","hyerin")
+                        .param("nickname","")
                         .param("email","rin@naver.com")
                         .param("password","rin12345")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"))
-                .andExpect(authenticated().withUsername("hyerin"));
+                .andExpect(authenticated().withUsername(""));
         //authentication자체의 정보들도 같이 확인 가능
 
         Account account = accountRepository.findByEmail("rin@naver.com");

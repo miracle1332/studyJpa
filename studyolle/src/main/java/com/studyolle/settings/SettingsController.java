@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
+@RequestMapping("/settings")
 @RequiredArgsConstructor
 public class SettingsController { //현재 사용자에 대한 정보를 넣어주고 수정하는 기능 컨트롤러S
 
@@ -53,7 +54,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
 
 
     //어떤 유저의 프로필을 보여주는지 굳이 url이 필요 없는게 수정할 수 있는 것은 오로지 자기 자신의 프로필뿐임.
-    @GetMapping(ROOT+SETTINGS+PROFILE)
+    @GetMapping(PROFILE)
     public String updateProfileForm(@CurrentAccount Account account, Model model) {
         //뷰를 보여줄때 사용할 모델객체들이 필요하니까 모델 정보를
         model.addAttribute(account); //모델에 어카운트 정보를 넣어줌
@@ -61,7 +62,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
         return SETTINGS+PROFILE; //사실 이코드는 줄일 수 있음 뷰네임 트랜슬레이터가 알아서 추측함.
     }
 
-    @PostMapping(ROOT+SETTINGS+PROFILE)
+    @PostMapping(PROFILE)
     public String updateProfile(@CurrentAccount Account account, @Valid @ModelAttribute Profile profile, Errors errors,
                                 Model model, RedirectAttributes attributes) {
         //위의 Account정보는 persist상태의 정보가 아닌 세션에 넣어놓은 authentication안에 들어있는 principal 객체의 정보이다
@@ -74,14 +75,14 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
         attributes.addFlashAttribute("message","프로필을 수정했습니다..");
         return "redirect:"  + ROOT + SETTINGS + PROFILE;//변경하고 난뒤 get post redirect패턴 - 사용자가 화면을 새로고침해도 폼 서브밋이 다시 일어나지 않도록!
     }
-    @GetMapping(ROOT+SETTINGS+PASSWORD) //모델객체 - 폼을 채울 객체를 보여줘야 하니 모델객체 있어야하고
+    @GetMapping(PASSWORD) //모델객체 - 폼을 채울 객체를 보여줘야 하니 모델객체 있어야하고
     public String UpdatePasswordForm(@CurrentAccount Account account, Model model){
         model.addAttribute(account);
         model.addAttribute(new PasswordForm());
         return SETTINGS+PASSWORD;
     }
 
-    @PostMapping(ROOT+ SETTINGS+PASSWORD) //현재 접속중인 사용자의 패스워드 수정
+    @PostMapping(PASSWORD) //현재 접속중인 사용자의 패스워드 수정
     public String updatePassword(@CurrentAccount Account account, @Valid @ModelAttribute PasswordForm passwordForm, Errors errors,
                                  Model model, RedirectAttributes attributes) {
         if(errors.hasErrors()) { //@CurrentAccount Account account-> detached상태의 객체
@@ -94,14 +95,14 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
     }
 
     //알림설정 - 테스트코드 작성안함 - 난 해보기
-    @GetMapping(SETTINGS+SETTINGS+NOTIFICATIONS)
+    @GetMapping(NOTIFICATIONS)
     public String updateNotificationsForm(@CurrentAccount Account account, Model model){
         model.addAttribute(account);
         model.addAttribute(modelMapper.map(account, Notifications.class));
         return SETTINGS+NOTIFICATIONS;
     }
 
-    @PostMapping(ROOT+SETTINGS+NOTIFICATIONS)
+    @PostMapping(NOTIFICATIONS)
     public String updateNotifications(@CurrentAccount Account account, @Valid @ModelAttribute Notifications notifications, Errors errors,
                                       Model model, RedirectAttributes attributes) {
         if(errors.hasErrors()) {
@@ -114,7 +115,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
 
     }
 
-    @GetMapping(ROOT+SETTINGS+TAGS)
+    @GetMapping(TAGS)
     public String updateTags(@CurrentAccount Account account, Model model) throws JsonProcessingException {
         model.addAttribute(account);
 
@@ -129,7 +130,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
         return SETTINGS+TAGS;
     }
 
-    @PostMapping(ROOT+ SETTINGS+TAGS + "/add") //ajax요청
+    @PostMapping(TAGS + "/add") //ajax요청
     @ResponseBody
     public ResponseEntity addTag(@CurrentAccount Account account, @RequestBody TagForm tagForm) {
         String title = tagForm.getTagTitle();
@@ -145,7 +146,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(ROOT+ SETTINGS+TAGS + "/remove") //ajax요청
+    @PostMapping(TAGS + "/remove") //ajax요청
     @ResponseBody
     public ResponseEntity removeTag(@CurrentAccount Account account, @RequestBody TagForm tagForm) {
         String title = tagForm.getTagTitle();
@@ -158,7 +159,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
         return ResponseEntity.ok().build();
     }
     //지역정보
-    @GetMapping(ROOT+SETTINGS+ZONES)
+    @GetMapping(ZONES)
     public String updateZonesForm(@CurrentAccount Account account, Model model) throws JsonProcessingException {
         model.addAttribute(account);
 
@@ -171,7 +172,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
 
     }
 
-    @PostMapping(ROOT+SETTINGS+ZONES + "/add")
+    @PostMapping(ZONES + "/add")
     @ResponseBody
     public ResponseEntity addZones(@CurrentAccount Account account, @RequestBody ZoneForm zoneForm) {
       Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCityName(),zoneForm.getProvinceName());
@@ -182,7 +183,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
       return ResponseEntity.ok().build();
     }
 
-    @PostMapping(ROOT+SETTINGS+ZONES + "/remove")
+    @PostMapping(ZONES + "/remove")
     @ResponseBody
     public ResponseEntity removeZone(@CurrentAccount Account account, @RequestBody ZoneForm zoneForm) {
         Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
@@ -195,14 +196,14 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
     }
 
     //닉네임 변경
-    @GetMapping(ROOT+SETTINGS+ACCOUNT)
+    @GetMapping(ACCOUNT)
     public String updateAccountForm(@CurrentAccount Account account, Model model) {
         model.addAttribute(account);
         model.addAttribute(modelMapper.map(account, NicknameForm.class));
         return SETTINGS+ACCOUNT;
     }
 
-    @PostMapping(ROOT+SETTINGS+ACCOUNT)
+    @PostMapping(ACCOUNT)
     public String updateAccount(@CurrentAccount Account account, @Valid @ModelAttribute NicknameForm nicknameForm, Errors errors,
                                  Model model, RedirectAttributes attributes) {
         if(errors.hasErrors()) {

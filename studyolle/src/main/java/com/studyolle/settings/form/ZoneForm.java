@@ -7,7 +7,7 @@ import lombok.Data;
 public class ZoneForm {
 
     private String zoneName;
-
+    //단위테스트 해보는것 좋음.
     public String getCityName() {
         return zoneName.substring(0, zoneName.indexOf("("));
     }
