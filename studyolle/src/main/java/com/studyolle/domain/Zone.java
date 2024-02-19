@@ -25,4 +25,9 @@ public class Zone {
     @Column(nullable = true)
     private String province; //도 / 경기도,,
 
+    @Override
+    public String toString() {
+        return String.format("%s(%s)/%s", city, localNameOfCity, province);
+    }
+
 }
