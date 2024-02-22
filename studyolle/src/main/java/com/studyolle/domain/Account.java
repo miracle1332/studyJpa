@@ -52,9 +52,9 @@ public class Account {
 
     private boolean studyEnrollmentResultByWeb = true; //웹으로 받을것인가
 
-    private boolean studyUpdateByEmail; //스터디 갱신 정보
+    private boolean studyUpdatedByEmail; //스터디 갱신 정보
 
-    private boolean studyUpdateByWeb = true;
+    private boolean studyUpdatedByWeb = true;
 
     @ManyToMany
     private Set<Tag> tags = new HashSet<>(); //set, list차이
