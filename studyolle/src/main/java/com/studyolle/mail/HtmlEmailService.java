@@ -27,7 +27,7 @@ public class HtmlEmailService implements EmailService{
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8"); //첨부파일 보낼거면 false아니고true로 바꿔야함.
             mimeMessageHelper.setTo(emailMessage.getTo());
             mimeMessageHelper.setSubject(emailMessage.getSubject());
-            mimeMessageHelper.setText(emailMessage.getMessage(), false); //두번째 파라미터에 html이면 true를 주면됌.
+            mimeMessageHelper.setText(emailMessage.getMessage(), true); //두번째 파라미터에 html이면 true를 주면됌.
             javaMailSender.send(mimeMessage);
             log.info("sent email:{}", emailMessage.getMessage());
         }catch (MessagingException e) {
