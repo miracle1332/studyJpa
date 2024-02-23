@@ -49,7 +49,7 @@ class SettingsControllerTest {
     }
 
 
-    @WithAccount("")
+    @WithAccount("hyerin")
     @DisplayName("계정의 지역 정보 수정 폼")
     @Test
     void updateZonesForm() throws Exception {
@@ -60,7 +60,7 @@ class SettingsControllerTest {
                 .andExpect(model().attributeExists("zones"));
     }
 
-    @WithAccount("")
+    @WithAccount("hyerin")
     @DisplayName("계정의 지역 정보 추가")
     @Test
     void addZone() throws Exception {
@@ -73,7 +73,7 @@ class SettingsControllerTest {
                         .with(csrf()))
                 .andExpect(status().isOk());
 
-        Account hyerin = accountRepository.findByNickname("keunes");
+        Account hyerin = accountRepository.findByNickname("hyerin");
         Zone zone = zoneRepository.findByCityAndProvince(testZone.getCity(), testZone.getProvince());
         assertTrue(hyerin.getZones().contains(zone));
     }
@@ -192,7 +192,7 @@ class SettingsControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @WithAccount("")
+    @WithAccount("hyerin")
     @DisplayName("계정에 태그 삭제")
     @Test
     void removeTag() throws Exception {

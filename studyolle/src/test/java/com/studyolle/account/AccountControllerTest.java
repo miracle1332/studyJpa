@@ -2,6 +2,8 @@
 package com.studyolle.account;
 
 import com.studyolle.domain.Account;
+import com.studyolle.mail.EmailMessage;
+import com.studyolle.mail.EmailService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,7 @@ class AccountControllerTest {
     private AccountRepository accountRepository;
 
     @MockBean
-    JavaMailSender javaMailSender;
+    EmailService emailService;
 
     @DisplayName("인증메일 확인 - 입력값이 오류인 경우")
     @Test
@@ -97,13 +99,13 @@ class AccountControllerTest {
     @Test
     void signUpSubmit_with_correct_input() throws Exception {
         mockMvc.perform(post("/sign-up")
-                        .param("nickname","")
+                        .param("nickname","hyerin")
                         .param("email","rin@naver.com")
                         .param("password","rin12345")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"))
-                .andExpect(authenticated().withUsername(""));
+                .andExpect(authenticated().withUsername("hyerin"));
         //authentication자체의 정보들도 같이 확인 가능
 
         Account account = accountRepository.findByEmail("rin@naver.com");
@@ -115,7 +117,7 @@ class AccountControllerTest {
         //어카운트레파지토리에 혜린의 이메일탓컴에 해당하는 계정이 존재하는지 확인
         assertTrue(accountRepository.existsByEmail("rin@naver.com"));
         //심플메일메세지타입의 아무런 타입가지고 send가 호줄이 됬는가만 확인하는것 =메일을 보냈다고 확인할 수 있는것
-        then(javaMailSender).should().send(any(SimpleMailMessage.class));
+        then(emailService).should().sendEmail(any(EmailMessage.class));
 
 
     }

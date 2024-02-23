@@ -2,6 +2,7 @@ package com.studyolle.mail;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 //EmailService구현체, 실제 이메일을 보내주는,,
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 @Profile("local")
 @Component
 public class ConsoleEmailService implements  EmailService{
+
     @Override
     public void sendEmail(EmailMessage emailMessage) {
         log.info("sent email:{}", emailMessage.getMessage());//인포레벨로 로깅만
