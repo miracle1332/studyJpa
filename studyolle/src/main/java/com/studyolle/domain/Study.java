@@ -50,4 +50,9 @@ public class Study {
     private boolean useBanner;
 
 
+    public void addManager(Account account) {
+        this.managers.add(account);
+        //private Set<Account> managers = new HashSet<>(); -> 위에서 new로 초기화 해놔서 getter 수정 안써도 됌.
+    }
 }
+

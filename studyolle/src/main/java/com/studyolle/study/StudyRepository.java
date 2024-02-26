@@ -1,9 +1,11 @@
 package com.studyolle.study;
 
 import com.studyolle.domain.Study;
+import com.studyolle.study.form.StudyForm;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
-public interface studyRepository extends JpaRepository<Study, Long> {
+@Transactional(readOnly = true)
+public interface StudyRepository extends JpaRepository<Study, Long> {
+    boolean existsByPath(StudyForm studyForm);
 }

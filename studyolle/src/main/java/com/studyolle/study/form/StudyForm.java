@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 @Data
-public class studyForm {
+public class StudyForm {
 
     @NotBlank
     @Length(min = 2, max = 20)
