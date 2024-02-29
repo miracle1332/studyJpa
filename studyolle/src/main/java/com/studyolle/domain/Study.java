@@ -37,7 +37,7 @@ public class Study {
     private String image;
 
     @ManyToMany
-    private Set<Zone> tags = new HashSet<>();
+    private Set<Tag> tags = new HashSet<>();
 
     @ManyToMany
     private Set<Zone> zones = new HashSet<>();
