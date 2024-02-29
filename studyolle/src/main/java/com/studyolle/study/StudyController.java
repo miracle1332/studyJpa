@@ -13,6 +13,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
@@ -26,6 +27,7 @@ public class StudyController {
     private final StudyService studyService;
     private final ModelMapper modelMapper;
     private final StudyFormValidator studyFormValidator;
+    private final StudyRepository studyRepository;
 
     @InitBinder("studyForm") //스터디폼을 받을때 검증
     public void studyFormInitBinder(WebDataBinder webDataBinder) {
@@ -38,6 +40,12 @@ public class StudyController {
         model.addAttribute(new StudyForm());
         return "study/form";
     }
+    @GetMapping("/study/{path}")
+    public String viewStudy(@CurrentAccount Account account, @PathVariable String path, Model model) {
+        model.addAttribute(account);
+        model.addAttribute(studyRepository.findByPath(path)); //스터디 정보를 모델에 넣고
+        return "study/view"; //뷰 이름을 리턴
+    }
 
     @PostMapping("/new-study")
     public String newStudySubmit(@CurrentAccount Account account, @Valid StudyForm studyForm, Errors errors) {
@@ -49,4 +57,7 @@ public class StudyController {
                                                                                                 //어카운트를 매니저로 추가해야 되기때문
         return "redirect:/study/" + URLEncoder.encode(newStudy.getPath(), StandardCharsets.UTF_8);
     }
+
+
+
 }

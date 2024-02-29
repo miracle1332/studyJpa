@@ -8,4 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface StudyRepository extends JpaRepository<Study, Long> {
     boolean existsByPath(StudyForm studyForm);
+
+    Study findByPath(String path);
 }

@@ -1,6 +1,8 @@
 package com.studyolle.domain;
 
+import com.studyolle.account.UserAccount;
 import lombok.*;
+import org.springframework.security.core.userdetails.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -49,10 +51,24 @@ public class Study {
     private boolean closed;
     private boolean useBanner;
 
+    //******뷰에서 Spring Expression으로 study.isJoinable 이런식으로 메소드 바로 호출 가능.
 
     public void addManager(Account account) {
         this.managers.add(account);
         //private Set<Account> managers = new HashSet<>(); -> 위에서 new로 초기화 해놔서 getter 수정 안써도 됌.
+    }
+    public boolean isJoinalbe(UserAccount userAccount) { //principal정보 -userAccount에는 account정보를 꺼낼 수 있음 = 결국 account접근가능
+        Account account = userAccount.getAccount();
+        return this.isPublished() && this.isRecruiting()
+                && !this.members.contains(account) && !this.managers.contains(account);
+    }
+
+    public boolean isMember(UserAccount userAccount) {
+        return this.members.contains(userAccount.getAccount());
+    }
+
+    public boolean isManager(UserAccount userAccount) {
+        return this.managers.contains(userAccount.getAccount());
     }
 }
 
