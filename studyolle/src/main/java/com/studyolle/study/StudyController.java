@@ -40,12 +40,6 @@ public class StudyController {
         model.addAttribute(new StudyForm());
         return "study/form";
     }
-    @GetMapping("/study/{path}")
-    public String viewStudy(@CurrentAccount Account account, @PathVariable String path, Model model) {
-        model.addAttribute(account);
-        model.addAttribute(studyRepository.findByPath(path)); //스터디 정보를 모델에 넣고
-        return "study/view"; //뷰 이름을 리턴
-    }
 
     @PostMapping("/new-study")
     public String newStudySubmit(@CurrentAccount Account account, @Valid StudyForm studyForm, Errors errors) {
@@ -58,6 +52,19 @@ public class StudyController {
         return "redirect:/study/" + URLEncoder.encode(newStudy.getPath(), StandardCharsets.UTF_8);
     }
 
+    @GetMapping("/study/{path}")
+    public String viewStudy(@CurrentAccount Account account, @PathVariable String path, Model model) {
+        model.addAttribute(account);
+        model.addAttribute(studyRepository.findByPath(path)); //스터디 정보를 모델에 넣고
+        return "study/view"; //뷰 이름을 리턴
+    }
+
+    @GetMapping("/study/{path}/members")
+    public String viewStudyMembers(@CurrentAccount Account account, @PathVariable String path, Model model) {
+        model.addAttribute(account);
+        model.addAttribute(studyRepository.findByPath(path));
+        return "study/members";
+    }
 
 
 }
