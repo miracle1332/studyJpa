@@ -6,9 +6,9 @@
     <div th:replace="fragments.html :: study-banner"></div>
     <div class="container">
         <div th:replace="fragments.html :: study-info"></div>
-        <div th:replace="fragments.html :: study-menu(studyMenu='members')"></div>
+        <div th:replace="fragments.html :: study-menu(studyMenu='members')"></div><!--문자열넘겨주는거-->
 
-        <div th:replace="fragments.html :: member-list(members=${study.managers},isManager=${true})"></div>
+        <div th:replace="fragments.html :: member-list(members=${study.managers},isManager=${true})"></div><!-- member-list(members=${study.managers} : 리스트 넘겨줌-->
         <div th:replace="fragments.html :: member-list(members=${study.members},isManager=${false})"></div>
 
         <div th:replace="fragments.html :: footer"></div>

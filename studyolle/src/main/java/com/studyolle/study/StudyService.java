@@ -2,7 +2,11 @@ package com.studyolle.study;
 
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
+import com.studyolle.study.event.StudyUpdateEvent;
+import com.studyolle.study.form.StudyDescriptionForm;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,10 +15,40 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudyService {
 
     private final StudyRepository studyRepository;
+    private final ModelMapper modelMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public Study createNewStudy(Study study, Account account) {
         Study newStudy = studyRepository.save(study);
         newStudy.addManager(account);
         return null;
+    }
+
+    public Study getStudyToUpdate(Account account, String path) { //수정을 위한 스터디정보 가져오기
+        Study study = this.getStudy(path);
+        checkIfManger(study, account);
+        return study;
+    }
+    public Study getStudy(String path) {
+        Study study = this.studyRepository.findByPath(path);
+        checkIfExistingStudy(path, study);
+        return study;
+    }
+
+    public void checkIfManger(Study study, Account account) {
+        if(!study.isManagedBy(account)) {
+            throw new IllegalArgumentException("해당 기능사용 권한이 없습니다.");
+        }
+    }
+
+    public void checkIfExistingStudy(String path, Study study) {
+        if (study == null) {
+            throw new IllegalArgumentException(path + "에 해당하는 스터디가 없습니다.");
+        }
+    }
+
+    public void updateStudyDescription(Study study, StudyDescriptionForm studyDescriptionForm) {
+        modelMapper.map(studyDescriptionForm, study);
+        eventPublisher.publishEvent(new StudyUpdateEvent(study, "스터디 소개를 수정하였씁니다."));
     }
 }
