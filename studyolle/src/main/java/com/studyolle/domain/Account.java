@@ -81,4 +81,8 @@ public class Account {
         return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
     }
 
+    public boolean isMangerOf(Study study) { //이메소드는 사실 스터디에 두어도 되고 어카운트에 두어도 됌. 그런데 어카운트 기준으로 생각해서 여기에 메소드를 만듬.
+        return study.getManagers().contains(this);
+    }
+
 }

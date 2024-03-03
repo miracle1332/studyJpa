@@ -68,17 +68,17 @@ public class AccountService implements UserDetailsService {
                 .studyCreatedByWeb(true)
                 .studyEnrollmentResultByWeb(true)
                 .build();*/
-        Account newAccount =  accountRepository.save(account); //어카운트 레파지토리로 저장을 한다.
+        Account newAccount = accountRepository.save(account); //어카운트 레파지토리로 저장을 한다.
         return newAccount;
     }
 
     void sendSignUpConfirmEmail(Account newAccount) { //html메세지
         Context context = new Context();
-        context.setVariable("link","/check-email-token?token=" + newAccount.getEmailCheckToken() +
+        context.setVariable("link", "/check-email-token?token=" + newAccount.getEmailCheckToken() +
                 "&email=" + newAccount.getEmail());
         context.setVariable("nickname", newAccount.getNickname());
-        context.setVariable("linkName","이메일인증하기");
-        context.setVariable("message","스터디 올래 서비스를 사용하려면 링크를 클릭하세요");
+        context.setVariable("linkName", "이메일인증하기");
+        context.setVariable("message", "스터디 올래 서비스를 사용하려면 링크를 클릭하세요");
         context.setVariable("host", appProperties.getHost());
 
         String message = templateEngine.process("mail/simple-link", context);//타임리프에 있는 컨텍스트
@@ -94,7 +94,7 @@ public class AccountService implements UserDetailsService {
 
     public void login(Account account) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-               new UserAccount(account), //이 객체가 principal객체가 된다. 만약 로그인을 하면 이게 로그인을 한 user객체로 간주가 됌.
+                new UserAccount(account), //이 객체가 principal객체가 된다. 만약 로그인을 하면 이게 로그인을 한 user객체로 간주가 됌.
                 account.getPassword(),
                 List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContextHolder.getContext().setAuthentication(token);
@@ -105,11 +105,11 @@ public class AccountService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String emailOrNickname) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(emailOrNickname);
-        if(account == null) {
+        if (account == null) {
             account = accountRepository.findByNickname(emailOrNickname);
         }
         //그랬는데도 못찾으믄
-        if(account == null) {
+        if (account == null) {
             throw new UsernameNotFoundException(emailOrNickname);
         }
         return new UserAccount(account); //프린시펄에 해당하는 객체를 넘기면 된다.
@@ -152,7 +152,7 @@ public class AccountService implements UserDetailsService {
         account.setStudyEnrollmentResultByWeb(notifications.isStudyEnrollmentResultByWeb());
         account.setStudyEnrollmentResultByEmail(notifications.isStudyEnrollmentResultByEmail());*/
         modelMapper.getConfiguration()
-                 .setDestinationNameTokenizer(NameTokenizers.UNDERSCORE)
+                .setDestinationNameTokenizer(NameTokenizers.UNDERSCORE)
                 .setSourceNameTokenizer(NameTokenizers.UNDERSCORE); //언더스코어가 아닌 이상 전부 하나의 프로퍼티로 간주.
         //노티피케이션의 변수가 길어서 매핑이 잘 안되는 경우가 발생했음.
         accountRepository.save(account);
@@ -167,11 +167,11 @@ public class AccountService implements UserDetailsService {
 
     public void sendLoginLink(Account account) {
         Context context = new Context();
-        context.setVariable("link","/login-by-email?token=" + account.getEmailCheckToken() +
+        context.setVariable("link", "/login-by-email?token=" + account.getEmailCheckToken() +
                 "&email=" + account.getEmail());
         context.setVariable("nickname", account.getNickname());
-        context.setVariable("linkName","로그인하기");
-        context.setVariable("message","로그인하려면 아래 링크를 클릭하세요");
+        context.setVariable("linkName", "로그인하기");
+        context.setVariable("message", "로그인하려면 아래 링크를 클릭하세요");
         context.setVariable("host", appProperties.getHost());
 
         String message = templateEngine.process("mail/simple-link", context);//타임리프에 있는 컨텍스트
@@ -200,12 +200,12 @@ public class AccountService implements UserDetailsService {
 
     public void removeTag(Account account, Tag tag) {
         Optional<Account> byId = accountRepository.findById(account.getId());
-        byId.ifPresent(a->a.getTags().remove(tag));
+        byId.ifPresent(a -> a.getTags().remove(tag));
     }
 
     public Set<Zone> getZones(Account account) {
         Optional<Account> byId = accountRepository.findById(account.getId());
-        return  byId.orElseThrow().getZones();
+        return byId.orElseThrow().getZones();
     }
 
     public void addZone(Account account, Zone zone) {
@@ -216,5 +216,13 @@ public class AccountService implements UserDetailsService {
     public void removeZone(Account account, Zone zone) {
         Optional<Account> byId = accountRepository.findById(account.getId());
         byId.ifPresent(a -> a.getZones().remove(zone));
+    }
+
+    public Account getAccount(String nickname) {
+        Account account = accountRepository.findByNickname(nickname);
+        if (nickname == null) {
+            throw new IllegalArgumentException(nickname + "에 해당하는 사용자가 없습니다.");
+        }
+        return account;
     }
 }

@@ -90,12 +90,9 @@ public class AccountController {
 
     @GetMapping("/profile/{nickname}")
     public String viewProfile(@PathVariable String nickname, Model model, @CurrentAccount Account account) {
-        Account byNickName = accountRepository.findByNickname(nickname);
-        if(nickname == null) {
-            throw new IllegalArgumentException(nickname + "에 해당하는 사용자가 없습니다.");
-        }
-        model.addAttribute(byNickName);
-        model.addAttribute("isOwner",byNickName.equals(account));
+        Account accountToView = accountService.getAccount(nickname);
+        model.addAttribute(accountToView);
+        model.addAttribute("isOwner",account.equals(accountToView)); //보려는 뷰가 현재 사용자인지 확인하는 코드
         return "settings/profile";
     }
 

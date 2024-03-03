@@ -55,6 +55,7 @@ public class StudyController {
 
     @GetMapping("/study/{path}")
     public String viewStudy(@CurrentAccount Account account, @PathVariable String path, Model model) {
+        Study study = studyService.getStudy(path);
         model.addAttribute(account);
         model.addAttribute(studyRepository.findByPath(path)); //스터디 정보를 모델에 넣고
         return "study/view"; //뷰 이름을 리턴
@@ -62,6 +63,7 @@ public class StudyController {
 
     @GetMapping("/study/{path}/members")
     public String viewStudyMembers(@CurrentAccount Account account, @PathVariable String path, Model model) {
+        Study study = studyService.getStudy(path);
         model.addAttribute(account);
         model.addAttribute(studyRepository.findByPath(path));
         return "study/members";
