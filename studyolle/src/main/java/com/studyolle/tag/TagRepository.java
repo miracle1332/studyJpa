@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Transactional(readOnly = true)
 public interface TagRepository extends JpaRepository<Tag, Long> {
-     Tag findByTitle(String title);
+     Tag findByTitle(String title); //스터디이름 가져오기
 }

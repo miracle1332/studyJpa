@@ -34,6 +34,12 @@ public class StudyService {
         checkIfExistingStudy(path, study);
         return study;
     }
+    public Study getStudyToUpdateTag(Account account, String path) { //관심주제 수정위해 스터디 가져오기
+        Study study = studyRepository.findStudyWithTagsByPath(path);
+        checkIfExistingStudy(path, study); //스터디 존재하는지
+        checkIfManger(study, account); //매니저만 스터디의 관심주제 수정할 수 있으므로
+        return study;
+    }
 
     public void checkIfManger(Study study, Account account) {
         if(!study.isManagedBy(account)) {
@@ -64,4 +70,6 @@ public class StudyService {
     public void disableStudyBanner(Study study) {
         study.setUseBanner(false);
     }
+
+
 }
