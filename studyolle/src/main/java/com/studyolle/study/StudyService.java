@@ -2,6 +2,8 @@ package com.studyolle.study;
 
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
+import com.studyolle.domain.Tag;
+import com.studyolle.domain.Zone;
 import com.studyolle.study.event.StudyUpdateEvent;
 import com.studyolle.study.form.StudyDescriptionForm;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,7 @@ public class StudyService {
     public Study createNewStudy(Study study, Account account) {
         Study newStudy = studyRepository.save(study);
         newStudy.addManager(account);
-        return null;
+        return newStudy;
     }
 
     public Study getStudyToUpdate(Account account, String path) { //수정을 위한 스터디정보 가져오기
@@ -40,7 +42,12 @@ public class StudyService {
         checkIfManger(study, account); //매니저만 스터디의 관심주제 수정할 수 있으므로
         return study;
     }
-
+    public Study getStudyToUpdateZone(Account account, String path) {
+            Study study = studyRepository.findStudyWithZoneByPath(path);
+            checkIfExistingStudy(path, study);
+            checkIfManger(study, account);
+            return study;
+        }
     public void checkIfManger(Study study, Account account) {
         if(!study.isManagedBy(account)) {
             throw new IllegalArgumentException("해당 기능사용 권한이 없습니다.");
@@ -72,4 +79,15 @@ public class StudyService {
     }
 
 
+    public void addTag(Study study, Tag tag) {
+        study.getTags().add(tag);
+    }
+
+    public void removeTag(Study study, Tag tag) {
+        study.getTags().remove(tag);
+    }
+
+    public void addZone(Study study, Zone zone) {
+        study.getZones().add(zone);
+    }
 }

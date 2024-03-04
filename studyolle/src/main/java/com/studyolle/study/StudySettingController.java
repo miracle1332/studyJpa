@@ -6,13 +6,18 @@ import com.studyolle.account.CurrentAccount;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.Tag;
+import com.studyolle.domain.Zone;
 import com.studyolle.settings.form.TagForm;
+import com.studyolle.settings.form.ZoneForm;
 import com.studyolle.study.form.StudyDescriptionForm;
 import com.studyolle.tag.TagRepository;
 import com.studyolle.tag.TagService;
+import com.studyolle.zone.ZoneRepository;
+import com.studyolle.zone.ZoneService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -33,7 +38,9 @@ public class StudySettingController {
     private final ModelMapper modelMapper;
     private final TagRepository tagRepository;
     private final TagService tagService;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+    private final ZoneRepository zoneRepository;
+    private final ZoneService zoneService;
 
 
     @GetMapping("/description") //스터디 설정 화면보여주기
@@ -103,7 +110,7 @@ public class StudySettingController {
                 .map(Tag::getTitle).collect(Collectors.toList()));
         List<String> allTagTitles = tagRepository.findAll().stream() //원래 있는 태그들?
                 .map(Tag::getTitle).collect(Collectors.toList());
-        model.addAttribute("whiteList", objectMapper.writeValueAsString(allTagTitles));
+        model.addAttribute("whitelist", objectMapper.writeValueAsString(allTagTitles));
         return "study/settings/tags";
     }
 
@@ -113,9 +120,50 @@ public class StudySettingController {
                                  @RequestBody TagForm tagForm) {
         Study study = studyService.getStudyToUpdateTag(account, path);
         Tag tag = tagService.findOrCreateNew(tagForm.getTagTitle());
-        return null;
+        studyService.addTag(study, tag);
+        return ResponseEntity.ok().build(); //status, messages, data
         }
 
+    @PostMapping("/tags/remove")
+    @ResponseBody
+    public ResponseEntity removeTag(@CurrentAccount Account account, @PathVariable String path,
+                                    @RequestBody TagForm tagForm) {
+
+        Study study = studyService.getStudyToUpdateTag(account, path);
+        Tag tag = tagRepository.findByTitle(tagForm.getTagTitle());
+        if(tag == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        studyService.removeTag(study, tag);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/zones") //지역 폼 보여주기
+    public String studyZonesForm(@CurrentAccount Account account, @PathVariable String path, Model model)
+        throws JsonProcessingException {
+
+        Study study = studyService.getStudyToUpdate(account,path); //관리자 권한 확인하고 스터디 정보일단 가져옴
+        model.addAttribute(account);
+        model.addAttribute(study);
+        model.addAttribute("zones",study.getZones().stream().map(Zone::toString).collect(Collectors.toList()));
+        List<String> allZones = zoneRepository.findAll().stream().map(Zone::toString).collect(Collectors.toList());
+        model.addAttribute("white;ist",objectMapper.writeValueAsString(allZones));
+        return "settings/zones";
+    }
+
+    @PostMapping("/zones/add")
+    @ResponseBody
+    public ResponseEntity addZone(@CurrentAccount Account account, @PathVariable String path, @RequestBody ZoneForm zoneForm) {
+        Study study = studyService.getStudyToUpdateZone(account, path);
+        Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
+        if(zone == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        studyService.addZone(study, zone);
+        return ResponseEntity.ok().build();
+
+    }
 
 
 }

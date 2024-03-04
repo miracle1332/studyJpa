@@ -12,4 +12,6 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
     Study findByPath(String path);
 
     Study findStudyWithTagsByPath(String path);
+
+    Study findStudyWithZoneByPath(String path);
 }

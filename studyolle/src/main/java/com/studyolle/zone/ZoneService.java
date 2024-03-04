@@ -35,4 +35,5 @@ public class ZoneService {
             zoneRepository.saveAll(zoneList); //뭉텅이로 db에 저장
         } ///-> 이 정보를 태기파이에서 whiteList로 쓰는거고 이 정보만 쓰는것! 새로운 지역정보 넣는건 안됌.
     }
+
 }
