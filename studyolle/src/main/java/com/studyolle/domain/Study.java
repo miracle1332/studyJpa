@@ -87,5 +87,37 @@ public class Study {
             throw new RuntimeException("스터디를 공개할 수 없는 상태입니다. 이미 공개했거나 종료되었을 수 있습니다. ");
         }
     }
+
+    public void close() {
+        if(this.published && !this.closed) {
+            this.closed = true;
+            this.closedDateTime = LocalDateTime.now();
+        }else  {
+            throw new RuntimeException("스터디를 종료할 수 없습니다. 공개된 스터디가 아니거나 이미 종료된 스터디입니다.");
+        }
+    }
+
+    public boolean canUpdateRecruiting() { //인원 모집 가능 여부
+        return this.published && this.recruitingUpdateDateTime == null
+                || this.recruitingUpdateDateTime.isBefore(LocalDateTime.now().minusHours(1)); //제한시간 1시간
+    }
+
+    public void startRecruit() {
+        if(canUpdateRecruiting()) {
+            this.recruiting = true;
+            this.recruitingUpdateDateTime = LocalDateTime.now();
+        }else {
+            throw new RuntimeException("인원모집을 시작할 수 없습니다. 스터디를 공개하거나 한시간 뒤에 다시 시도해주세요.");
+        }
+    }
+
+    public void stopRecruit() { //스터디 엔티티의 boolean 타입 recruiting 의 상태(t,f)를 바꿔주는 메소드 ->
+        if(canUpdateRecruiting()) {
+            this.recruiting = false;
+            this.recruitingUpdateDateTime = LocalDateTime.now();
+        }else  {
+            throw new RuntimeException("인원모집을 중지할 수 없습니다. 스터디 공개 혹은 한시간뒤 다시 시도바람");
+        }
+    }
 }
 

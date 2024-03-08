@@ -13,10 +13,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.studyolle.study.form.StudyForm.VALID_PATH_PATTERN;
+
 @Service @Transactional //데이터를 변경하는 작업은 서비스에 위임해서 트랜잭션 안에서 처리기로 약속했기에 트랜잭셔널리드온리는 리파지토리쪽에만 줌.
 @RequiredArgsConstructor
 public class StudyService {
-
     private final StudyRepository studyRepository;
     private final ModelMapper modelMapper;
     private final ApplicationEventPublisher eventPublisher;
@@ -26,10 +27,7 @@ public class StudyService {
         newStudy.addManager(account);
         return newStudy;
     }
-    public void publish(Study study) { //스터디 엔티티에서 로직이 한번 더 생기는 이유?
-        study.publish();
-        this.eventPublisher.publishEvent(new StudyCreatedEvent(study));
-    }
+
     public Study getStudyToUpdate(Account account, String path) { //스터디가 있는지 없는지
         Study study = this.getStudy(path);
         checkIfManger(study, account);
@@ -107,6 +105,34 @@ public class StudyService {
         study.getZones().remove(zone);
     }
 
+    public void publish(Study study) { //스터디 엔티티에서 로직이 한번 더 생기는 이유?
+        study.publish();
+        this.eventPublisher.publishEvent(new StudyCreatedEvent(study));
+    }
+    public void close(Study study) {
+        study.close();
+        this.eventPublisher.publishEvent(new StudyUpdateEvent(study, " 스터디를 종료했습니다."));
+    }
 
+    public void startRecruit(Study study) {
+        study.startRecruit();
+        this.eventPublisher.publishEvent(new StudyUpdateEvent(study,"스터디에서 인원모집을 시작했습니다."));
+    }
 
+    public void stopRecruit(Study study) { //컨드롤러 -> 서비스에서 스터디 앤티티에서 메소드 한번 더 호출. 왜 바로 서비스클래스에서 로직 작성안하는지?
+        study.stopRecruit();
+        this.eventPublisher.publishEvent(new StudyUpdateEvent(study, "스터디에서 인원모집을 종료했습니다."));
+    }
+
+    public boolean isValidPath(String newPath) { //경로 타입이 규칙에 맞는지 확인
+        if (!newPath.matches(VALID_PATH_PATTERN)) {
+            return false;
+        }
+
+        return !studyRepository.existsByPath(newPath); //규칙에 맞고 db에 기존 경로가 없으면 false리턴
+    }
+
+    public void updateStudyPath(Study study, String newPath) { //새 경로로 변경 설정
+        study.setPath(newPath);
+    }
 }
