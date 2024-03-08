@@ -85,7 +85,7 @@ public class SettingsController { //현재 사용자에 대한 정보를 넣어�
     @PostMapping(PASSWORD) //현재 접속중인 사용자의 패스워드 수정
     public String updatePassword(@CurrentAccount Account account, @Valid @ModelAttribute PasswordForm passwordForm, Errors errors,
                                  Model model, RedirectAttributes attributes) {
-        if(errors.hasErrors()) { //@CurrentAccount Account account-> detached상태의 객체
+        if(errors.hasErrors()) { //@CurrentAccount Account account-> detached상태의 객체 //account객체는 영속성 리파지토리를 통해 가져온 객체가 아니라 스프링시큐리티 컨텍스트에 저장해놓은 객체 인증될떄 세션에 남아있던 객체
             model.addAttribute(account);
             return SETTINGS+PASSWORD;
         }

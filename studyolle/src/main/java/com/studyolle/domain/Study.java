@@ -78,5 +78,14 @@ public class Study {
     public String getEncodePath() {
         return URLEncoder.encode(this.path, StandardCharsets.UTF_8);
     }
+
+    public void publish() {
+        if(!this.closed && !this.published) {
+            this.published = true;
+            this.publishedDateTime = LocalDateTime.now();
+        }else {
+            throw new RuntimeException("스터디를 공개할 수 없는 상태입니다. 이미 공개했거나 종료되었을 수 있습니다. ");
+        }
+    }
 }
 

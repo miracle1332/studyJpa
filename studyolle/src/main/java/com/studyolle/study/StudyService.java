@@ -4,6 +4,7 @@ import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
+import com.studyolle.study.event.StudyCreatedEvent;
 import com.studyolle.study.event.StudyUpdateEvent;
 import com.studyolle.study.form.StudyDescriptionForm;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,11 @@ public class StudyService {
         newStudy.addManager(account);
         return newStudy;
     }
-
-    public Study getStudyToUpdate(Account account, String path) { //수정을 위한 스터디정보 가져오기
+    public void publish(Study study) { //스터디 엔티티에서 로직이 한번 더 생기는 이유?
+        study.publish();
+        this.eventPublisher.publishEvent(new StudyCreatedEvent(study));
+    }
+    public Study getStudyToUpdate(Account account, String path) { //스터디가 있는지 없는지
         Study study = this.getStudy(path);
         checkIfManger(study, account);
         return study;
@@ -48,6 +52,14 @@ public class StudyService {
             checkIfManger(study, account);
             return study;
         }
+
+    public Study getStudyToUpdateStatus(Account account, String path) { //스터디 상태변경
+            Study study = studyRepository.findStudyWithManagersByPath(path);
+            checkIfExistingStudy(path, study);
+            checkIfManger(study, account);
+            return study;
+    }
+
     public void checkIfManger(Study study, Account account) {
         if(!study.isManagedBy(account)) {
             throw new IllegalArgumentException("해당 기능사용 권한이 없습니다.");
@@ -90,4 +102,11 @@ public class StudyService {
     public void addZone(Study study, Zone zone) {
         study.getZones().add(zone);
     }
+
+    public void removeZone(Study study, Zone zone) {
+        study.getZones().remove(zone);
+    }
+
+
+
 }
