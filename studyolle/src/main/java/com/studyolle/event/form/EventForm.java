@@ -20,7 +20,7 @@ public class EventForm { //알림양식
     private EventType eventType = EventType.FCFS; //알림타입 -
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private LocalDateTime endEnrollmentDateTime; //등록종료일시
+    private LocalDateTime endEnrollmentDateTime; //모임 접수 종료
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime startDateTime; //시작일시

@@ -1,6 +1,7 @@
 package com.studyolle.event;
 
 import com.studyolle.domain.Account;
+import com.studyolle.domain.Event;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,13 +22,13 @@ attributeNodes: 로딩 전략을 적용할 속성 노드들을 지정합니다. 
 Enrollment.withEventAndStudy 엔티티 그래프는 event 속성을 함께 로딩하고, event 엔티티와 연관된 study 속성도 함께 로딩. subgraphs 속성을 사용하여 study 속성에 대한 서브 그래프를 정의하고 있습니다. 이렇게 하면 event 엔티티와 연관된 study 속성도 함께 로딩됩니다.*/
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
-public class Enrollment { //등록 엔티티
+public class Enrollment { //모임 접수 엔티티
 
         @Id
         @GeneratedValue
         private Long id;
 
-        @ManyToOne //다(등록) 대 일(이벤트) 양방향관계 => 주인은 다 쪽, 등록은 여러개일 수 있고 알림은 하나임.
+        @ManyToOne //다(모임접수) 대 일(이벤트) 양방향관계 => 주인은 다 쪽, 등록은 여러개일 수 있고 알림은 하나임.
         private Event event;
 
         @ManyToOne //다대일 단방향

@@ -33,7 +33,7 @@ public class StudyService {
         checkIfManger(study, account);
         return study;
     }
-    public Study getStudyToUpdateStatus(Account account, String path) { //스터디 상태변경
+    public Study getStudyToUpdateStatus(Account account, String path) { //스터디 상태변경을 위한 스터디가져오기
         Study study = studyRepository.findStudyWithManagersByPath(path);
         checkIfExistingStudy(path, study);
         checkIfManger(study, account);
