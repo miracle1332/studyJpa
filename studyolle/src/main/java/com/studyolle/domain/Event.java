@@ -5,11 +5,13 @@ import com.studyolle.event.EventType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.var;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @NamedEntityGraph(
@@ -61,6 +63,23 @@ public class Event {
     public long getNumberOfAcceptedEnrollments() {
         return this.enrollments.stream().filter(Enrollment::isAccepted).count();
         // enrollments 리스트에 있는 모든 Enrollment 객체 중에서 isAccepted() 메소드가 true를 반환하는 객체만 세어서 그 개수를 반환
+    }
+
+    public void acceptWaitingList() {
+        if(this.isAbleToAcceptWaitingEnrollment()) { //접수대기 가능하면
+            var waitingList = getWaitngList();  // Math.min(a, b) 함수는 a와 b 중 작은 값을 반환
+            int numberToAccept = (int)Math.min(this.limitOfEnrollments - this.getNumberOfAcceptedEnrollments(),waitingList.size());
+            waitingList.subList(0, numberToAccept).forEach(enrollment -> enrollment.setAccepted(true));
+        }
+    }
+
+    private List<Enrollment> getWaitngList() {
+        return this.enrollments.stream().filter(enrollment -> !enrollment.isAccepted()).collect(Collectors.toList());
+                                                    //접수건중 승인되지 않은 것들만 필터링해서 list로 리턴
+    }
+
+    private boolean isAbleToAcceptWaitingEnrollment() { //접수대기가 가능한지 확인하는 메소드
+        return this.eventType == EventType.FCFS && this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments();
     }
 }
 
