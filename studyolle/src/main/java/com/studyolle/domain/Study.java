@@ -52,6 +52,7 @@ public class Study {
     private boolean published; //공개했는지 안했는지
     private boolean closed;
     private boolean useBanner;
+    private int memberCount;
 
     //******뷰에서 Spring Expression으로 study.isJoinable 이런식으로 메소드 바로 호출 가능.
 
@@ -118,6 +119,20 @@ public class Study {
         }else  {
             throw new RuntimeException("인원모집을 중지할 수 없습니다. 스터디 공개 혹은 한시간뒤 다시 시도바람");
         }
+    }
+
+    public boolean isRemovable() {
+        return !this.published; //TODO 모임을 했던 스터디는 삭제할 수 없다.
+    }
+
+    public void addMember(Account account) {
+        this.getMembers().add(account);
+        this.memberCount++;
+    }
+
+    public void removeMember(Account account) {
+        this.getMembers().remove(account);
+        this.memberCount--;
     }
 }
 

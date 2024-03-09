@@ -157,7 +157,8 @@ public class StudySettingController {
         Study study = studyService.getStudyToUpdateZone(account, path);
         Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
         if(zone == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build(); //버튼 노출 허용했기에 클라이언트 잘못이 아님. 그래서 badrequest가 맞고, ux상
+            //다른걸 보여줄려고 badrequest와 밑에 에러던지기를 같이 해봄.
         }
 
         studyService.addZone(study, zone);
@@ -233,7 +234,7 @@ public class StudySettingController {
     public String updateStudyPath(@CurrentAccount Account account, @PathVariable String path, String newPath,
                                   Model model, RedirectAttributes attributes) {
         Study study = studyService.getStudyToUpdateStatus(account, path);
-        if(!studyService.isValidPath(newPath)) { // false와 fasle가 만나 true
+        if(!studyService.isValidPath(newPath)) { // 벨리데이터 없는 대신 여기서 벨리데이드 코드 구현한거고 , false와 fasle가 만나 true
             model.addAttribute(account);
             model.addAttribute(study);
             model.addAttribute("studyPathErroer","해당 스터디 경로는 사용할 수 없습니다. 다른 값을 사용해주세요.");
@@ -244,6 +245,29 @@ public class StudySettingController {
 
         return "redirect:/study" + study.getEncodePath() + "/settings/study";
     }
+
+    @PostMapping("/study/title")  //스터디 이름 수정
+    public String updateStudyTitle(@CurrentAccount Account account, @PathVariable String path, String newTitle,
+                                   Model model, RedirectAttributes attributes) {
+        Study study = studyService.getStudyToUpdateStatus(account, path);
+        if(!studyService.isValidTitle(newTitle)) {
+            model.addAttribute(account);
+            model.addAttribute(study);
+            model.addAttribute("studyTitleError", "스터디 이름을 다시 입력하세요.");
+            return "study/settings/study";
+        }
+
+        studyService.updateStudyTitle(study, newTitle);
+        attributes.addFlashAttribute("message", "스터디 이름을 수정했습니다.");
+        return "redirect:/study/" + study.getEncodePath() + "/settings/study";
+    }
+    @PostMapping("/study/remove")
+    public String removeStudy(@CurrentAccount Account account, @PathVariable String path, Model model) {
+        Study study = studyService.getStudyToUpdateStatus(account, path);
+        studyService.remove(study);
+        return "redirect:/";
+    }
+
 
 
 

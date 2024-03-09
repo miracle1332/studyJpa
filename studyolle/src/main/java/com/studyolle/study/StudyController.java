@@ -68,6 +68,20 @@ public class StudyController {
         model.addAttribute(studyRepository.findByPath(path));
         return "study/members";
     }
+    @GetMapping("/study/{path}/join") //스터디 가입
+
+    public String joinStudy(@CurrentAccount Account account, @PathVariable String path) {
+        Study study = studyRepository.findStudyWithMembersByPath(path);
+        studyService.addMember(study, account);
+        return "redirect:/study/" + study.getEncodePath() + "/members";
+    }
+
+    @GetMapping("/study/{path}/leave") //스터디 탈퇴
+    public String leaveStudy(@CurrentAccount Account account, @PathVariable String path) {
+        Study study = studyRepository.findStudyWithMembersByPath(path);
+        studyService.removeMember(study, account);
+        return "redirect:/study/" + study.getEncodePath() + "/members";
+    }
 
 
 }

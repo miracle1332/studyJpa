@@ -33,6 +33,13 @@ public class StudyService {
         checkIfManger(study, account);
         return study;
     }
+    public Study getStudyToUpdateStatus(Account account, String path) { //스터디 상태변경
+        Study study = studyRepository.findStudyWithManagersByPath(path);
+        checkIfExistingStudy(path, study);
+        checkIfManger(study, account);
+        return study;
+    }
+
     public Study getStudy(String path) {
         Study study = this.studyRepository.findByPath(path);
         checkIfExistingStudy(path, study);
@@ -51,12 +58,6 @@ public class StudyService {
             return study;
         }
 
-    public Study getStudyToUpdateStatus(Account account, String path) { //스터디 상태변경
-            Study study = studyRepository.findStudyWithManagersByPath(path);
-            checkIfExistingStudy(path, study);
-            checkIfManger(study, account);
-            return study;
-    }
 
     public void checkIfManger(Study study, Account account) {
         if(!study.isManagedBy(account)) {
@@ -105,7 +106,8 @@ public class StudyService {
         study.getZones().remove(zone);
     }
 
-    public void publish(Study study) { //스터디 엔티티에서 로직이 한번 더 생기는 이유?
+    public void publish(Study study) { /*컨트롤러에서 바로 도메인메소드 호출하지 않고 서비스메소드로 한번 감싸서
+                                            부르는 이유는 객체 상태를 변경하는것이기 때문에 트랜잭션안에 있어야하기 때문임.*/
         study.publish();
         this.eventPublisher.publishEvent(new StudyCreatedEvent(study));
     }
@@ -119,7 +121,8 @@ public class StudyService {
         this.eventPublisher.publishEvent(new StudyUpdateEvent(study,"스터디에서 인원모집을 시작했습니다."));
     }
 
-    public void stopRecruit(Study study) { //컨드롤러 -> 서비스에서 스터디 앤티티에서 메소드 한번 더 호출. 왜 바로 서비스클래스에서 로직 작성안하는지?
+    public void stopRecruit(Study study) { /*컨트롤러에서 바로 도메인메소드 호출하지 않고 서비스메소드로 한번 감싸서
+                                            부르는 이유는 객체 상태를 변경하는것이기 때문에 트랜잭션안에 있어야하기 때문임.*/
         study.stopRecruit();
         this.eventPublisher.publishEvent(new StudyUpdateEvent(study, "스터디에서 인원모집을 종료했습니다."));
     }
@@ -134,5 +137,27 @@ public class StudyService {
 
     public void updateStudyPath(Study study, String newPath) { //새 경로로 변경 설정
         study.setPath(newPath);
+    }
+
+    public boolean isValidTitle(String newTitle) { //새 스터디이름으로 변경
+       return newTitle.length() <= 50;
+    }
+
+    public void updateStudyTitle(Study study, String newTitle) {
+        study.setTitle(newTitle);
+    }
+
+    public void remove(Study study) {
+        if(study.isRemovable()) {
+            studyRepository.delete(study);
+        } else {
+            throw new IllegalArgumentException("스터디 삭제가 불가합니다..");
+        }
+    }
+    public void addMember(Study study, Account account) {
+        study.addMember(account);
+    }
+    public void removeMember(Study study, Account account) {
+        study.removeMember(account);
     }
 }
