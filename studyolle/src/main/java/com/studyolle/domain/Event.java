@@ -5,7 +5,6 @@ import com.studyolle.event.EventType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.var;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 )
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
-public class Event {
+public class Event { //모임 도메인
 
     @Id @GeneratedValue
     private Long id;
@@ -67,7 +66,7 @@ public class Event {
 
     public void acceptWaitingList() {
         if(this.isAbleToAcceptWaitingEnrollment()) { //접수대기 가능하면
-            var waitingList = getWaitngList();  // Math.min(a, b) 함수는 a와 b 중 작은 값을 반환
+            List<Enrollment> waitingList = getWaitngList();  // Math.min(a, b) 함수는 a와 b 중 작은 값을 반환
             int numberToAccept = (int)Math.min(this.limitOfEnrollments - this.getNumberOfAcceptedEnrollments(),waitingList.size());
             waitingList.subList(0, numberToAccept).forEach(enrollment -> enrollment.setAccepted(true));
         }
@@ -78,8 +77,48 @@ public class Event {
                                                     //접수건중 승인되지 않은 것들만 필터링해서 list로 리턴
     }
 
-    private boolean isAbleToAcceptWaitingEnrollment() { //접수대기가 가능한지 확인하는 메소드
+    public boolean isAbleToAcceptWaitingEnrollment() { //접수대기가 가능한지 확인하는 메소드
         return this.eventType == EventType.FCFS && this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments();
+    }
+
+
+    public void addEnrollment(Enrollment enrollment) {
+        this.enrollments.add(enrollment);
+        enrollment.setEvent(this); //양방향관계
+    }
+
+    public void removeEnrollment(Enrollment enrollment) {
+        this.enrollments.remove(enrollment);
+        enrollment.setEvent(null);
+    }
+
+    public void acceptNextWaitingEnrollment() {
+        if(this.isAbleToAcceptWaitingEnrollment()) {
+            Enrollment enrollmentToAccept = this.getTheFirstWaitingEnrollment();
+
+        }
+    }
+
+    private Enrollment getTheFirstWaitingEnrollment() {
+        for(Enrollment e : this.enrollments) {
+            if(!e.isAccepted()) { //승인되지 않은 접수건들이 차례로 리턴
+                return  e;
+            }
+        }
+        return null;
+    }
+
+    public void accept(Enrollment enrollment) {
+        if(this.eventType == EventType.CONFIRMATIVE &&
+                    this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments())  {
+            enrollment.setAccepted(true);
+        }
+    }
+
+    public void reject(Enrollment enrollment) {
+        if(this.eventType == EventType.CONFIRMATIVE) {
+            enrollment.setAccepted(false);
+        }
     }
 }
 

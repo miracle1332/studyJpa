@@ -8,8 +8,10 @@ import com.studyolle.event.form.EventForm;
 import com.studyolle.event.validator.EventValidator;
 import com.studyolle.study.StudyRepository;
 import com.studyolle.study.StudyService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -120,6 +122,60 @@ public class EventController {
         eventService.updateEvent(event, eventForm);
         return "redirect:/study/" + study.getEncodePath() +  "/events/" + event.getId();
     }
+
+    @DeleteMapping("/events/{id}") //모임 삭제
+    public String cancelEvent(@CurrentAccount Account account, @PathVariable String path, @PathVariable("id") Event event) {
+        Study study = studyService.getStudyToUpdateStatus(account,path);
+        eventService.deleteEvent(event);
+        return "redirect:/study" + study.getEncodePath() + "/events/" + event.getId();
+    }
+
+    @PostMapping("/events/{id}/enroll") //모임 등록
+    public String newEnrollment(@CurrentAccount Account account, @PathVariable String path, @PathVariable("id") Event event) {
+        Study study = studyService.getStudyToEnroll(path); //왜 이 메소드에는 account객체가 필요 없는가?.....
+        eventService.newEnrollment(event, account);
+        return "redirect:/study/" + study.getEncodePath() + "/events/" + event.getId();
+    }
+
+    @PostMapping("/events/{id}/disenroll")
+    public String cancelEnrollments(@CurrentAccount Account account, @PathVariable String path, @PathVariable("id") Event event) {
+        Study study = studyService.getStudyToEnroll(path);
+        eventService.cancelEnrollment(event, account);
+        return "redirect:/study/" + study.getEncodePath() + "/events/" + event.getId();
+    }
+
+    @GetMapping("events/{eventId}/enrollments/{enrollmentId}/accept") //모입 접수 승인하기
+    public String acceptEnrollment(@CurrentAccount Account account, @PathVariable String path, @PathVariable("eventId") Event event,
+                                   @PathVariable("enrollmentId") Enrollment enrollment){
+        Study study = studyService.getStudyToUpdate(account, path);
+        eventService.acceptEnrollment(event, enrollment);
+        return "redirect:/study/" + study.getEncodePath() + "/events/" + event.getId();
+    }
+
+    @GetMapping("events/{eventId}/enrollments/{enrollmentId}/reject") //모임 접수 거절하기
+    public String rejectEnrollment(@CurrentAccount Account account, @PathVariable String path, @PathVariable("eventId") Event event,
+                                   @PathVariable("enrollmentId") Enrollment enrollment) {
+        Study study = studyService.getStudyToUpdate(account, path);
+        eventService.rejectEnrollment(event, enrollment); //어떤 모임인지, 어떤 접수건인지
+        return "redirect:/study/" + study.getEncodePath() + "/events/" + event.getId();
+    }
+
+    @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/checkin")
+    public String checkInEnrollment(@CurrentAccount Account account, @PathVariable String path,
+                                    @PathVariable("eventId") Event event, @PathVariable("enrollmentId") Enrollment enrollment) {
+        Study study = studyService.getStudyToUpdate(account, path);
+        eventService.checkInEnrollment(enrollment);
+        return "redirect:/study/" + study.getEncodePath() + "/events/" + event.getId();
+    }
+
+    @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/cancel-checkin")
+    public String cancelCheckInEnrollment(@CurrentAccount Account account, @PathVariable String path,
+                                          @PathVariable("eventId") Event event, @PathVariable("enrollmentId") Enrollment enrollment) {
+        Study study = studyService.getStudyToUpdate(account, path);
+        eventService.cancelCheckInEnrollment(enrollment);
+        return "redirect:/study/" + study.getEncodePath()+ "/events/" + event.getId();
+    }
+
 }
 
 
